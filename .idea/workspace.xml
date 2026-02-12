@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5881d2a0-90eb-45ce-914b-261f1f659de9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="5881d2a0-90eb-45ce-914b-261f1f659de9" name="Changes" comment="Issue #10: Set up CI workflow for Gradle">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/gradle.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/gradle.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,6 +24,13 @@
     "assignee": "amal-sabs"
   }
 }]]></component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="main" />
+      </list>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/amal-sabs/ticket-noob.git",
@@ -59,6 +66,19 @@
       <option name="presentableId" value="Default" />
       <updated>1770861429203</updated>
     </task>
+    <task id="LOCAL-00001" summary="Issue #10: Set up CI workflow for Gradle">
+      <option name="closed" value="true" />
+      <created>1770864191955</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1770864191955</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Issue #10: Set up CI workflow for Gradle" />
+    <option name="LAST_COMMIT_MESSAGE" value="Issue #10: Set up CI workflow for Gradle" />
   </component>
 </project>
