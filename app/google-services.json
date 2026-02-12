@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "3933534343",
+    "project_id": "ticket-noob",
+    "storage_bucket": "ticket-noob.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:3933534343:android:47365a099a8dd9a39da022",
+        "android_client_info": {
+          "package_name": "app.src.main.AndroidManifest.xml"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKURlNqDX3ZZJQBZjw1e3jKp-KblTyT-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
