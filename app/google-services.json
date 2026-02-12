@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:3933534343:android:47365a099a8dd9a39da022",
+        "mobilesdk_app_id": "1:3933534343:android:3c8a90d6b37b95519da022",
         "android_client_info": {
-          "package_name": "app.src.main.AndroidManifest.xml"
+          "package_name": "com.example.ticketnoob"
         }
       },
       "oauth_client": [],
