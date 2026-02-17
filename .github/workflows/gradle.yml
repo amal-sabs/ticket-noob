@@ -28,6 +28,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Setup Google Services JSON
+      run: |
+        mkdir -p app
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
@@ -35,11 +40,6 @@ jobs:
 
     - name: Make gradlew executable
       run: chmod +x gradlew
-
-    - name: Setup Google Services JSON
-      run: |
-        mkdir -p app
-        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
