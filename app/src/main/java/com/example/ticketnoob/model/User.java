@@ -1,4 +1,4 @@
-package com.example.ticketapp.model;
+package com.example.ticketnoob.model;
 
 import java.io.Serializable;
 
