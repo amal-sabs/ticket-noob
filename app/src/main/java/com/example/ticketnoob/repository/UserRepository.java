@@ -1,6 +1,6 @@
 package com.example.ticketnoob.repository;
 
-import com.example.ticketapp.model.User;
+import com.example.ticketnoob.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
