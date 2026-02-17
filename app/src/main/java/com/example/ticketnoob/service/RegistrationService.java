@@ -14,7 +14,7 @@ public class RegistrationService {
     private final EditText etName, etEmail, etPhone, etPassword;
     private final Button btnRegister;
     private final UserRepository userRepository;
-    private Context context;
+    private final Context context;
 
     public RegistrationService(Context context, UserRepository repo, EditText name, EditText email, EditText phone, EditText pass, Button reg) {
         this.etName = name;
@@ -40,6 +40,7 @@ public class RegistrationService {
 
             if (success) {
                 Toast.makeText(context, "Success!", Toast.LENGTH_SHORT).show();
+                clearForm();
             } else {
                 Toast.makeText(context, "Registration failed.", Toast.LENGTH_LONG).show();
             }
@@ -59,12 +60,12 @@ public class RegistrationService {
         }
 
         if (!email.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Invalid email format");
+            etEmail.setError("Please enter a valid email");
             return null;
         }
 
-        if (!phone.isEmpty() && phone.length() < 7) {
-            etPhone.setError("Invalid phone number");
+        if (!phone.isEmpty() && !android.util.Patterns.PHONE.matcher(phone).matches()) {
+            etPhone.setError("Please enter a valid phone number");
             return null;
         }
 
@@ -78,5 +79,12 @@ public class RegistrationService {
         }
 
         return new User(name, email, phone, password, "CUSTOMER");
+    }
+
+    private void clearForm() {
+        etName.setText("");
+        etEmail.setText("");
+        etPhone.setText("");
+        etPassword.setText("");
     }
 }
