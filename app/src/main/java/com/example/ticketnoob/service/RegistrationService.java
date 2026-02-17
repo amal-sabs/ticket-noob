@@ -11,14 +11,13 @@ import com.example.ticketnoob.model.User;
 
 public class RegistrationService {
 
-    private final EditText etFirstName, etLastName, etEmail, etPhone, etPassword;
+    private final EditText etName, etEmail, etPhone, etPassword;
     private final Button btnRegister;
     private final UserRepository userRepository;
     private Context context;
 
-    public RegistrationService(Context context, UserRepository repo, EditText firstName, EditText lastName, EditText email, EditText phone, EditText pass, Button reg) {
-        this.etFirstName = firstName;
-        this.etLastName = lastName;
+    public RegistrationService(Context context, UserRepository repo, EditText name, EditText email, EditText phone, EditText pass, Button reg) {
+        this.etName = name;
         this.etEmail = email;
         this.etPhone = phone;
         this.etPassword = pass;
@@ -48,8 +47,7 @@ public class RegistrationService {
     }
 
     private User validateAndBuildUser() {
-        String firstName = etFirstName.getText().toString().trim();
-        String lastName = etLastName.getText().toString().trim();
+        String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -70,12 +68,8 @@ public class RegistrationService {
             return null;
         }
 
-        if (firstName.isEmpty()) {
-            etFirstName.setError("Please provide a first name");
-            return null;
-        }
-        if (lastName.isEmpty()) {
-            etLastName.setError("Please provide a last name");
+        if (name.isEmpty()) {
+            etName.setError("Please provide a name");
             return null;
         }
         if (password.isEmpty()) {
