@@ -1,10 +1,22 @@
+package com.example.ticketnoob.service;
+
+import android.content.Context;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.example.ticketnoob.repository.UserRepository;
+import com.example.ticketnoob.model.User;
+
+
 public class RegistrationService {
 
     private final EditText etFirstName, etLastName, etEmail, etPhone, etPassword;
     private final Button btnRegister;
     private final UserRepository userRepository;
+    private Context context;
 
-    public RegistrationService(UserRepository repo, EditText firstName, EditText lastName, EditText email, EditText phone, EditText pass, Button reg) {
+    public RegistrationService(Context context, UserRepository repo, EditText firstName, EditText lastName, EditText email, EditText phone, EditText pass, Button reg) {
         this.etFirstName = firstName;
         this.etLastName = lastName;
         this.etEmail = email;
@@ -12,6 +24,7 @@ public class RegistrationService {
         this.etPassword = pass;
         this.btnRegister = reg;
         this.userRepository = repo;
+        this.context = context.getApplicationContext();
     }
 
     public void init() {
@@ -23,7 +36,14 @@ public class RegistrationService {
         User newUser = validateAndBuildUser();
 
         if (newUser != null) {
-            userRepository.saveUser(newUser);
+
+            boolean success = userRepository.save(newUser);
+
+            if (success) {
+                Toast.makeText(context, "Success!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Registration failed.", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
