@@ -25,4 +25,12 @@ replay_pid*
 
 *.bin
 
+# General IDE
+.idea/
+*.iml
+*.iws
+
+# Build files
+.gradle/
+build/
 local.properties
