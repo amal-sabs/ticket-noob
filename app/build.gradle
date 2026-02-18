@@ -29,6 +29,20 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    packagingOptions {
+        resources {
+            excludes += [
+                    "META-INF/LICENSE.md",
+                    "META-INF/LICENSE-notice.md"
+            ]
+        }
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -38,8 +52,13 @@ dependencies {
     implementation libs.constraintlayout
     implementation libs.firebase.common
     implementation libs.firebase.firestore
+    implementation libs.junit.jupiter
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     implementation platform('com.google.firebase:firebase-bom:34.9.0')
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.2"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.10.2"
+
 }
