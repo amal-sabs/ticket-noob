@@ -7,7 +7,7 @@ public class ServiceResult<T> {
     public final String field;
     public final T data;
 
-    private ServiceResult(boolean success, String message, String field, T data) {
+    ServiceResult(boolean success, String message, String field, T data) {
         this.success = success;
         this.message = message;
         this.field = field;
