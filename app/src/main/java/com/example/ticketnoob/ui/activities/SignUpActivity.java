@@ -38,21 +38,38 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void handleRegistration() {
 
+        etName.setError(null);
+        etEmail.setError(null);
+        etPhone.setError(null);
+        etPassword.setError(null);
+
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        ServiceResult<User> result =
-                registrationService.register(name, email, phone, password);
+        setLoading(true);
 
-        if (!result.success) {
-            showError(result);
-            return;
-        }
+        registrationService.register(name, email, phone, password, result -> {
+            setLoading(false);
 
-        Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
-        clearForm();
+            if (result == null) {
+                Toast.makeText(this, "Registration failed (no response)", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (!result.success) {
+                showError(result);
+                return;
+            }
+
+            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
+            clearForm();
+        });
+    }
+
+    private void setLoading(boolean loading) {
+        btnRegister.setEnabled(!loading);
     }
 
     private void showError(ServiceResult<User> result) {
@@ -60,20 +77,26 @@ public class SignUpActivity extends AppCompatActivity {
         switch (result.field) {
             case "name":
                 etName.setError(result.message);
+                etName.requestFocus();
                 break;
             case "email":
                 etEmail.setError(result.message);
+                etEmail.requestFocus();
                 break;
             case "phone":
                 etPhone.setError(result.message);
+                etPhone.requestFocus();
                 break;
             case "password":
                 etPassword.setError(result.message);
+                etPassword.requestFocus();
                 break;
             case "email_phone":
                 etEmail.setError(result.message);
                 etPhone.setError(result.message);
+                etEmail.requestFocus();
                 break;
+            case "repository":
             default:
                 Toast.makeText(this, result.message, Toast.LENGTH_LONG).show();
         }
