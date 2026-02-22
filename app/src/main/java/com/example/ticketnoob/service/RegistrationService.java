@@ -1,56 +1,71 @@
 package com.example.ticketnoob.service;
 
+import android.util.Patterns;
+
 import com.example.ticketnoob.model.User;
 import com.example.ticketnoob.repository.UserRepository;
 
-import java.util.regex.Pattern;
+import java.util.UUID;
+
 public class RegistrationService {
 
     private final UserRepository userRepository;
 
-    private static final Pattern EMAIL_REGEX =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-
-    private static final Pattern PHONE_REGEX =
-            Pattern.compile("^\\d{10}$");
     public RegistrationService(UserRepository repo) {
         this.userRepository = repo;
     }
 
-    public ServiceResult<User> register(String name, String email, String phone, String password) {
+    public void register(String name,
+                         String email,
+                         String phone,
+                         String password,
+                         ServiceCallback<User> callback) {
+
+        name = safeTrim(name);
+        email = safeTrim(email);
+        phone = safeTrim(phone);
 
         if (email.isEmpty() && phone.isEmpty()) {
-            return ServiceResult.error("Provide email OR phone", "email_phone");
+            callback.onComplete(ServiceResult.error("Provide email OR phone", "email_phone"));
+            return;
         }
 
-        if (!email.isEmpty() && !EMAIL_REGEX.matcher(email).matches()) {
-            return ServiceResult.error("Invalid email format", "email");
+        if (!email.isEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            callback.onComplete(ServiceResult.error("Invalid email format", "email"));
+            return;
         }
 
-        if (!phone.isEmpty() && !PHONE_REGEX.matcher(phone).matches()) {
-            return ServiceResult.error("Invalid phone format", "phone");
+        if (!phone.isEmpty() && !Patterns.PHONE.matcher(phone).matches()) {
+            callback.onComplete(ServiceResult.error("Invalid phone format", "phone"));
+            return;
         }
 
         if (name.isEmpty()) {
-            return ServiceResult.error("Name required", "name");
+            callback.onComplete(ServiceResult.error("Name required", "name"));
+            return;
         }
 
-        if (password.isEmpty()) {
-            return ServiceResult.error("Password required", "password");
+        if (password == null || password.isEmpty()) {
+            callback.onComplete(ServiceResult.error("Password required", "password"));
+            return;
         }
 
-        User user = new User(name, email, phone, password, "CUSTOMER");
+        User user = new User(name, email, phone, password, "CUSTOMER"); // Hard code customer for now
 
-        try {
-            boolean success = userRepository.save(user);
-
-            if (!success) {
-                return ServiceResult.error("Registration failed", "repository");
+        userRepository.save(user, (success, error) -> {
+            if (success == null || !success) {
+                callback.onComplete(ServiceResult.error(
+                        error != null ? error : "Registration failed",
+                        "repository"
+                ));
+                return;
             }
-        } catch (Exception e){
-            return ServiceResult.error("Registration failed", "repository");
-        }
 
-        return ServiceResult.success(user);
+            callback.onComplete(ServiceResult.success(user));
+        });
+    }
+
+    private static String safeTrim(String s) {
+        return s == null ? "" : s.trim();
     }
 }

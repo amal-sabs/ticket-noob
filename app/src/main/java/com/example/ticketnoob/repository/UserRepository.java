@@ -1,6 +1,9 @@
 package com.example.ticketnoob.repository;
 
 import com.example.ticketnoob.model.User;
+import com.google.firebase.firestore.Filter;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,72 +11,181 @@ import java.util.UUID;
 
 public class UserRepository {
 
-    private final List<User> users = new ArrayList<>();
+    private final FirebaseFirestore database;
 
-    public boolean save(User user) {
-        if (user == null) return false;
+    public UserRepository() {
+        this.database = FirebaseFirestore.getInstance();
+    }
 
-        // Prevent duplicate email
-        if (user.getEmail() != null && findByEmail(user.getEmail()) != null) {
-            return false;
+    public void save(User user, RepositoryCallback<Boolean> callback) {
+
+        if (user == null) {
+            callback.onComplete(false, "User is null");
+            return;
         }
 
-        // Prevent duplicate phone
-        if (user.getPhone() != null && findByPhone(user.getPhone()) != null) {
-            return false;
-        }
-
-        // Auto-generate ID if missing
         if (user.getId() == null || user.getId().isEmpty()) {
             user.setId(UUID.randomUUID().toString());
         }
 
-        users.add(user);
-        return true;
-    }
+        boolean hasEmail = user.getEmail() != null && !user.getEmail().isEmpty();
+        boolean hasPhone = user.getPhone() != null && !user.getPhone().isEmpty();
 
-    public User findByEmail(String email) {
-        for (User user : users) {
-            if (email != null && email.equalsIgnoreCase(user.getEmail())) {
-                return user;
-            }
+        if (!hasEmail && !hasPhone) {
+            callback.onComplete(false, "Email or phone required");
+            return;
         }
-        return null;
-    }
 
-    public User findByPhone(String phone) {
-        for (User user : users) {
-            if (phone != null && phone.equals(user.getPhone())) {
-                return user;
-            }
+        Query query;
+
+        if (hasEmail && hasPhone) {
+            query = database.collection("users")
+                    .where(Filter.or(
+                            Filter.equalTo("email", user.getEmail()),
+                            Filter.equalTo("phone", user.getPhone())
+                    ));
+        } else if (hasEmail) {
+            query = database.collection("users")
+                    .whereEqualTo("email", user.getEmail());
+        } else {
+            query = database.collection("users")
+                    .whereEqualTo("phone", user.getPhone());
         }
-        return null;
+
+        query.get()
+                .addOnSuccessListener(snapshot -> {
+
+                    if (!snapshot.isEmpty()) {
+                        boolean emailExists = false;
+                        boolean phoneExists = false;
+
+                        for (var doc : snapshot.getDocuments()) {
+                            User existing = doc.toObject(User.class);
+                            if (existing == null) continue;
+
+                            if (hasEmail && existing.getEmail() != null
+                                    && existing.getEmail().equalsIgnoreCase(user.getEmail())) {
+                                emailExists = true;
+                            }
+
+                            if (hasPhone && existing.getPhone() != null
+                                    && existing.getPhone().equals(user.getPhone())) {
+                                phoneExists = true;
+                            }
+                        }
+
+                        if (emailExists) {
+                            callback.onComplete(false, "Email already exists");
+                            return;
+                        }
+
+                        if (phoneExists) {
+                            callback.onComplete(false, "Phone already exists");
+                            return;
+                        }
+
+                        callback.onComplete(false, "User already exists");
+                        return;
+                    }
+
+                    saveUserToFirestore(user, callback);
+                })
+                .addOnFailureListener(e ->
+                        callback.onComplete(false, e.getMessage()));
     }
 
-    public User authenticate(String emailOrPhone, String password) {
-        for (User user : users) {
+    private void saveUserToFirestore(User user, RepositoryCallback<Boolean> callback) {
+        database.collection("users")
+                .document(user.getId())
+                .set(user)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        callback.onComplete(true, null);
+                    } else {
+                        Exception e = task.getException();
+                        callback.onComplete(false, e != null ? e.getMessage() : "Unknown Firestore error");
+                    }
+                });
+    }
 
-            boolean matchesEmail =
-                    user.getEmail() != null &&
-                            user.getEmail().equalsIgnoreCase(emailOrPhone);
+    public void authenticate(String emailOrPhone,
+                             String password,
+                             RepositoryCallback<User> callback) {
 
-            boolean matchesPhone =
-                    user.getPhone() != null &&
-                            user.getPhone().equals(emailOrPhone);
+        if (emailOrPhone == null || emailOrPhone.isEmpty()
+                || password == null || password.isEmpty()) {
 
-            if ((matchesEmail || matchesPhone)
-                    && user.getPassword().equals(password)) {
-                return user;
-            }
+            callback.onComplete(null, "Invalid credentials");
+            return;
         }
-        return null;
+
+        Query query = database.collection("users")
+                .where(
+                        Filter.or(
+                                Filter.equalTo("email", emailOrPhone),
+                                Filter.equalTo("phone", emailOrPhone)
+                        )
+                );
+
+        query.get()
+                .addOnSuccessListener(snapshot -> {
+
+                    if (snapshot.isEmpty()) {
+                        callback.onComplete(null, "Invalid credentials");
+                        return;
+                    }
+
+                    var document = snapshot.getDocuments().get(0);
+                    User user = document.toObject(User.class);
+
+                    if (user == null) {
+                        callback.onComplete(null, "Invalid credentials");
+                        return;
+                    }
+
+                    if (!user.getPassword().equals(password)) {
+                        callback.onComplete(null, "Invalid credentials");
+                        return;
+                    }
+
+                    callback.onComplete(user, null);
+                })
+                .addOnFailureListener(e ->
+                        callback.onComplete(null, e.getMessage()));
     }
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users);
+    public void getAllUsers(RepositoryCallback<List<User>> callback) {
+
+        database.collection("users")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+
+                    List<User> users = new ArrayList<>();
+
+                    snapshot.getDocuments().forEach(doc -> {
+                        User user = doc.toObject(User.class);
+                        if (user != null) {
+                            users.add(user);
+                        }
+                    });
+
+                    callback.onComplete(users, null);
+                })
+                .addOnFailureListener(e ->
+                        callback.onComplete(null, e.getMessage()));
     }
 
-    public boolean deleteUser(String userId) {
-        return users.removeIf(user -> user.getId().equals(userId));
+    public void deleteUser(String userId, RepositoryCallback<Boolean> callback) {
+
+        if (userId == null || userId.isEmpty()) {
+            callback.onComplete(false, "UserId required");
+            return;
+        }
+
+        database.collection("users")
+                .document(userId)
+                .delete()
+                .addOnSuccessListener(unused -> callback.onComplete(true, null))
+                .addOnFailureListener(e -> callback.onComplete(false, e.getMessage()));
     }
 }
