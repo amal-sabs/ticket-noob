@@ -11,31 +11,30 @@ public class LoginService {
         this.userRepository = repo;
     }
 
-    public ServiceResult<User> login(String emailOrPhone, String password) {
+    public void login(String emailOrPhone,
+                      String password,
+                      ServiceCallback<User> callback) {
 
-        if (emailOrPhone.isEmpty()) {
-            return ServiceResult.error(
-                    "Please provide email or phone number",
-                    "emailOrPhone"
-            );
+        if (emailOrPhone == null || emailOrPhone.trim().isEmpty()) {
+            callback.onComplete(ServiceResult.error("Provide email or phone", "emailOrPhone"));
+            return;
         }
 
-        if (password.isEmpty()) {
-            return ServiceResult.error(
-                    "Please provide a password",
-                    "password"
-            );
+        if (password == null || password.isEmpty()) {
+            callback.onComplete(ServiceResult.error("Provide password", "password"));
+            return;
         }
 
-        User user = userRepository.authenticate(emailOrPhone, password);
+        userRepository.authenticate(emailOrPhone.trim(), password, (user, error) -> {
+            if (user == null) {
+                callback.onComplete(ServiceResult.error(
+                        error != null ? error : "Invalid credentials",
+                        "credentials"
+                ));
+                return;
+            }
 
-        if (user == null) {
-            return ServiceResult.error(
-                    "Invalid credentials",
-                    "credentials"
-            );
-        }
-
-        return ServiceResult.success(user);
+            callback.onComplete(ServiceResult.success(user));
+        });
     }
 }

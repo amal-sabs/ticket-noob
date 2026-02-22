@@ -38,24 +38,40 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleLogin() {
 
+        etEmailOrPhone.setError(null);
+        etPassword.setError(null);
+
         String emailOrPhone = etEmailOrPhone.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        ServiceResult<User> result =
-                loginService.login(emailOrPhone, password);
+        setLoading(true);
 
-        if (!result.success) {
-            showError(result);
-            return;
-        }
+        loginService.login(emailOrPhone, password, result -> {
+            setLoading(false);
 
-        User user = result.data;
-        Toast.makeText(this,
-                "Welcome " + user.getName(),
-                Toast.LENGTH_SHORT).show();
+            if (!result.success) {
+                showError(result);
+                return;
+            }
+
+            User user = result.data;
+
+            Toast.makeText(this,
+                    "Welcome " + (user != null ? user.getName() : ""),
+                    Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void setLoading(boolean loading) {
+        btnLogin.setEnabled(!loading);
+        btnLogin.setText(loading ? "Logging in..." : "Login");
     }
 
     private void showError(ServiceResult<?> result) {
+        if (result == null) {
+            Toast.makeText(this, "Unknown error", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         switch (result.field) {
             case "emailOrPhone":
@@ -69,8 +85,10 @@ public class LoginActivity extends AppCompatActivity {
                 break;
 
             case "credentials":
+            case "repository":
+            default:
                 Toast.makeText(this,
-                        result.message,
+                        result.message != null ? result.message : "Login failed",
                         Toast.LENGTH_SHORT).show();
                 break;
         }
