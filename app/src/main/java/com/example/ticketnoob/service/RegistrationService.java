@@ -1,15 +1,22 @@
 package com.example.ticketnoob.service;
 
-import android.util.Patterns;
 
 import com.example.ticketnoob.model.User;
 import com.example.ticketnoob.repository.UserRepository;
 
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class RegistrationService {
 
     private final UserRepository userRepository;
+    private static final Pattern EMAIL_REGEX = Pattern.compile(
+            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
+    );
+
+    private static final Pattern PHONE_REGEX = Pattern.compile(
+            "^\\+?[0-9]{10,15}$"
+    );
 
     public RegistrationService(UserRepository repo) {
         this.userRepository = repo;
@@ -30,12 +37,12 @@ public class RegistrationService {
             return;
         }
 
-        if (!email.isEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!email.isEmpty() && !EMAIL_REGEX.matcher(email).matches()) {
             callback.onComplete(ServiceResult.error("Invalid email format", "email"));
             return;
         }
 
-        if (!phone.isEmpty() && !Patterns.PHONE.matcher(phone).matches()) {
+        if (!phone.isEmpty() && !PHONE_REGEX.matcher(phone).matches()) {
             callback.onComplete(ServiceResult.error("Invalid phone format", "phone"));
             return;
         }
