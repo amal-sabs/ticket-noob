@@ -25,6 +25,8 @@
 
         <activity
             android:name=".ui.activities.SignUpActivity" />
+        <activity android:name=".ui.activities.EventListActivity"/>
+        <activity android:name=".ui.activities.EventDetailActivity" />
     </application>
 
 </manifest>

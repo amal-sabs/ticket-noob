@@ -13,11 +13,10 @@ public class Event implements Serializable {
     private double price;
     private String status; //ACTIVE or CANCELLED
 
-    private String createdBy;
 
     public Event(){}
 
-    public Event(String id, String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, String status, String createdBy){
+    public Event(String id, String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, String status){
         this.id = id;
         this.title = title;
         this.description = description;
@@ -28,10 +27,9 @@ public class Event implements Serializable {
         this.availableSeats = availableSeats;
         this.price = price;
         this.status = status;
-        this.createdBy = createdBy;
     }
 
-    public Event(String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, String status, String createdBy){
+    public Event(String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, String status){
         this.title = title;
         this.description = description;
         this.date = date;
@@ -41,7 +39,6 @@ public class Event implements Serializable {
         this.availableSeats = availableSeats;
         this.price = price;
         this.status = status;
-        this.createdBy = createdBy;
     }
 
     public String getId() {
@@ -122,14 +119,6 @@ public class Event implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
     }
 
     public boolean isActive() {

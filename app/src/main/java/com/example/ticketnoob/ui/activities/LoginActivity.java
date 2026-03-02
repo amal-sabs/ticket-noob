@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,6 +13,7 @@ import com.example.ticketnoob.model.User;
 import com.example.ticketnoob.repository.UserRepository;
 import com.example.ticketnoob.service.LoginService;
 import com.example.ticketnoob.service.ServiceResult;
+import com.example.ticketnoob.ui.activities.EventListActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,6 +32,10 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
+        String prefill = getIntent().getStringExtra("emailOrPhone");
+        if (prefill != null && !prefill.isEmpty()){
+            etEmailOrPhone.setText(prefill);
+        }
         UserRepository userRepository = new UserRepository();
         loginService = new LoginService(userRepository);
 
@@ -53,12 +59,17 @@ public class LoginActivity extends AppCompatActivity {
                 showError(result);
                 return;
             }
-
+            // SUCCESS:
+            Intent intent = new Intent(LoginActivity.this, EventListActivity.class);
             User user = result.data;
+            if(user != null){
+                intent.putExtra("userName", user.getName());
+            }
 
-            Toast.makeText(this,
-                    "Welcome " + (user != null ? user.getName() : ""),
-                    Toast.LENGTH_SHORT).show();
+            startActivity(intent);
+
+            // close loginActivity so pressing back doesn't return to it
+            finish();
         });
     }
 

@@ -37,31 +37,31 @@ class EventServiceTest {
         // Active event with seats available
         activeEventWithSeats = new Event(
                 "a1", "Concert A", "Desc", "2026-06-15",
-                "London", "Music", 100, 50, 25.0, "ACTIVE", "admin1"
+                "London", "Music", 100, 50, 25.0, "ACTIVE"
         );
 
         // Active event but fully booked
         activeEventNoSeats = new Event(
                 "a2", "Concert B", "Desc", "2026-06-20",
-                "Paris", "Music", 100, 0, 30.0, "ACTIVE", "admin1"
+                "Paris", "Music", 100, 0, 30.0, "ACTIVE"
         );
 
         // Music event in London
         musicEventLondon = new Event(
                 "b1", "Jazz Night", "Desc", "2026-07-01",
-                "London", "Music", 200, 100, 15.0, "ACTIVE", "admin1"
+                "London", "Music", 200, 100, 15.0, "ACTIVE"
         );
 
         // Sports event in Paris
         sportsEventParis = new Event(
                 "b2", "Football Match", "Desc", "2026-07-01",
-                "Paris", "Sports", 500, 200, 40.0, "ACTIVE", "admin1"
+                "Paris", "Sports", 500, 200, 40.0, "ACTIVE"
         );
 
         // Music event in Paris
         musicEventParis = new Event(
                 "b3", "Paris Concert", "Desc", "2026-08-10",
-                "Paris", "Music", 300, 150, 50.0, "ACTIVE", "admin1"
+                "Paris", "Music", 300, 150, 50.0, "ACTIVE"
         );
     }
 
