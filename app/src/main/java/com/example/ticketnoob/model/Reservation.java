@@ -11,18 +11,18 @@ public class Reservation implements Serializable{
 
     public Reservation(){}
 
-    public Reservation(String id, String userId, String eventId, String status, String timestamp){
+    public Reservation(String id, String userId, String eventId, Status status, String timestamp){
         this.id = id;
         this.userId = userId;
         this.eventId = eventId;
-        this.status = status;
+        this.status = status != null ? status.name() : null;
         this.timestamp = timestamp;
     }
 
     public Reservation(String userId, String eventId, String timestamp){
         this.userId = userId;
         this.eventId = eventId;
-        this.status = "ACTIVE";
+        this.status = Status.ACTIVE.name();
         this.timestamp = timestamp;
     }
 
@@ -66,12 +66,19 @@ public class Reservation implements Serializable{
         this.timestamp = timestamp;
     }
 
+    public Status getStatusEnum(){
+        return Status.fromString(status);
+    }
+
+    public void setStatusEnum(Status statusEnum){
+        this.status = statusEnum != null ? statusEnum.name() : null;
+    }
     public boolean isActive() {
-        return "ACTIVE".equalsIgnoreCase(status);
+        return Status.ACTIVE == getStatusEnum();
     }
 
     public boolean isCancelled() {
-        return "CANCELLED".equalsIgnoreCase(status);
+        return Status.CANCELLED == getStatusEnum();
     }
 
     @Override

@@ -16,7 +16,7 @@ public class Event implements Serializable {
 
     public Event(){}
 
-    public Event(String id, String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, EventStatus status){
+    public Event(String id, String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, Status status){
         this.id = id;
         this.title = title;
         this.description = description;
@@ -29,7 +29,7 @@ public class Event implements Serializable {
         this.status = status != null ? status.name() : null;
     }
 
-    public Event(String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, EventStatus status){
+    public Event(String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, Status status){
         this.title = title;
         this.description = description;
         this.date = date;
@@ -121,20 +121,20 @@ public class Event implements Serializable {
         this.status = status;
     }
 
-    public EventStatus getStatusEnum(){
-        return EventStatus.fromString(status);
+    public Status getStatusEnum(){
+        return Status.fromString(status);
     }
 
-    public void setStatusEnum(EventStatus statusEnum){
+    public void setStatusEnum(Status statusEnum){
         this.status = statusEnum != null ? statusEnum.name() : null;
     }
 
     public boolean isActive() {
-        return EventStatus.ACTIVE == getStatusEnum();
+        return Status.ACTIVE == getStatusEnum();
     }
 
     public boolean isCancelled() {
-        return EventStatus.CANCELLED == getStatusEnum();
+        return Status.CANCELLED == getStatusEnum();
     }
 
     public boolean hasAvailableSeats() {
