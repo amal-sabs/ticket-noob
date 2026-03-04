@@ -1,6 +1,7 @@
 package com.example.ticketnoob.repository;
 
 import com.example.ticketnoob.model.Event;
+import com.example.ticketnoob.model.EventStatus;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -18,9 +19,9 @@ public class EventRepository {
 
     // This is just to populate the db with some events
     public void seedSampleEvents() {
-        addEvent("Jazz Night", "2026-03-10 19:30", "Montreal, QC", "Music", 35.00, 120, "ACTIVE");
-        addEvent("Tech Conference", "2026-04-01 09:00", "Laval, QC", "Conference", 199.99, 45, "ACTIVE");
-        addEvent("Food Festival", "2026-03-20 12:00", "Downtown", "Festival", 12.50, 300, "ACTIVE");
+        addEvent("Jazz Night", "2026-03-10 19:30", "Montreal, QC", "Music", 35.00, 120, EventStatus.ACTIVE.name());
+        addEvent("Tech Conference", "2026-04-01 09:00", "Laval, QC", "Conference", 199.99, 45, EventStatus.ACTIVE.name());
+        addEvent("Food Festival", "2026-03-20 12:00", "Downtown", "Festival", 12.50, 300, EventStatus.ACTIVE.name());
     }
 
     private void addEvent(String title, String date, String location, String category, double price, int availableSeats, String status) {

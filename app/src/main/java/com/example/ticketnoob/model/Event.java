@@ -11,12 +11,12 @@ public class Event implements Serializable {
     private int capacity;
     private int availableSeats;
     private double price;
-    private String status; //ACTIVE or CANCELLED
+    private String status; // stored as string for firestore compatibility
 
 
     public Event(){}
 
-    public Event(String id, String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, String status){
+    public Event(String id, String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, EventStatus status){
         this.id = id;
         this.title = title;
         this.description = description;
@@ -26,10 +26,10 @@ public class Event implements Serializable {
         this.capacity = capacity;
         this.availableSeats = availableSeats;
         this.price = price;
-        this.status = status;
+        this.status = status != null ? status.name() : null;
     }
 
-    public Event(String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, String status){
+    public Event(String title, String description, String date, String location, String category, int capacity, int availableSeats, double price, EventStatus status){
         this.title = title;
         this.description = description;
         this.date = date;
@@ -38,7 +38,7 @@ public class Event implements Serializable {
         this.capacity = capacity;
         this.availableSeats = availableSeats;
         this.price = price;
-        this.status = status;
+        this.status = status != null ? status.name() : null;
     }
 
     public String getId() {
@@ -121,12 +121,20 @@ public class Event implements Serializable {
         this.status = status;
     }
 
+    public EventStatus getStatusEnum(){
+        return EventStatus.fromString(status);
+    }
+
+    public void setStatusEnum(EventStatus statusEnum){
+        this.status = statusEnum != null ? statusEnum.name() : null;
+    }
+
     public boolean isActive() {
-        return "ACTIVE".equalsIgnoreCase(status);
+        return EventStatus.ACTIVE == getStatusEnum();
     }
 
     public boolean isCancelled() {
-        return "CANCELLED".equalsIgnoreCase(status);
+        return EventStatus.CANCELLED == getStatusEnum();
     }
 
     public boolean hasAvailableSeats() {
