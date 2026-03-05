@@ -92,7 +92,7 @@ public class EventService {
 
             // Filter by date
             if (!dateTrimmed.isEmpty()){
-                if(event.getDate() == null || !event.getDate().equalsIgnoreCase(dateTrimmed)){
+                if(event.getDate() == null || !event.getDate().startsWith(dateTrimmed)){
                     continue;
                 }
             }

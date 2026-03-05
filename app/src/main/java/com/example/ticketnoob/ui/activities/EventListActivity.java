@@ -1,5 +1,6 @@
 package com.example.ticketnoob.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Toast;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,6 +22,7 @@ import com.example.ticketnoob.ui.adapters.EventAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class EventListActivity extends AppCompatActivity {
@@ -33,6 +36,8 @@ public class EventListActivity extends AppCompatActivity {
     private String selectedDate = "";
     private String selectedLocation = "";
     private String selectedCategory = "";
+    private String selectedKeyword = "";
+    private final List<Event> serviceFilteredEvents = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,7 @@ public class EventListActivity extends AppCompatActivity {
         });
         rvEvents.setAdapter(eventAdapter);
         findViewById(R.id.btnFilter).setOnClickListener(v -> showFilterDialog());
+        setupSearch();
 
         eventService = new EventService(new EventRepository());
 
@@ -57,6 +63,7 @@ public class EventListActivity extends AppCompatActivity {
         applyFilters();
     }
 
+    @SuppressLint("StringFormatInvalid")
     private void applyFilters() {
         eventService.filterEvents(selectedDate, selectedLocation, selectedCategory, true, result -> {
             if (result == null || !result.success) {
@@ -68,14 +75,59 @@ public class EventListActivity extends AppCompatActivity {
             }
 
             List<Event> newEvents = (result.data != null) ? result.data : new ArrayList<>();
-            eventAdapter.updateEvents(newEvents);
+            serviceFilteredEvents.clear();
+            serviceFilteredEvents.addAll(newEvents);
+            int visibleCount = applyKeywordFilter();
 
             Toast.makeText(
                     this,
-                    getString(R.string.filter_result_count, newEvents.size()),
+                    getString(R.string.filter_result_count, visibleCount),
                     Toast.LENGTH_SHORT
             ).show();
         });
+    }
+
+    private void setupSearch() {
+        SearchView searchView = findViewById(R.id.svEventSearch);
+        searchView.setQueryHint(getString(R.string.search_events_hint));
+        searchView.setIconifiedByDefault(false);
+        searchView.setIconified(false);
+        searchView.clearFocus();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                selectedKeyword = safeTrim(query);
+                applyKeywordFilter();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                selectedKeyword = safeTrim(newText);
+                applyKeywordFilter();
+                return true;
+            }
+        });
+    }
+
+    private int applyKeywordFilter() {
+        if (selectedKeyword.isEmpty()) {
+            eventAdapter.updateEvents(new ArrayList<>(serviceFilteredEvents));
+            return serviceFilteredEvents.size();
+        }
+
+        List<Event> keywordFiltered = new ArrayList<>();
+        String keywordLower = selectedKeyword.toLowerCase(Locale.US);
+
+        for (Event event : serviceFilteredEvents) {
+            String title = event.getTitle();
+            if (title != null && title.toLowerCase(Locale.US).contains(keywordLower)) {
+                keywordFiltered.add(event);
+            }
+        }
+
+        eventAdapter.updateEvents(keywordFiltered);
+        return keywordFiltered.size();
     }
 
     private void showFilterDialog() {
