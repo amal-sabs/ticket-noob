@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">ticketnoob</string>
+    <string name="events_title">Events</string>
+    <string name="filter_button">Filter</string>
+    <string name="filter_title">Filter events</string>
+    <string name="filter_apply">Apply</string>
+    <string name="filter_clear">Clear</string>
+    <string name="filter_cancel">Cancel</string>
+    <string name="filter_date_hint">Date (example: 2026-03-10)</string>
+    <string name="filter_location_hint">Location</string>
+    <string name="filter_category_hint">Category</string>
+    <string name="filter_result_count">Showing %1$d events</string>
 </resources>
