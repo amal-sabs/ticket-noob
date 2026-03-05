@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -63,8 +64,16 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
-            Toast.makeText(this, "Success!", Toast.LENGTH_SHORT).show();
-            clearForm();
+            Toast.makeText(this, "Account created. Please log in.", Toast.LENGTH_SHORT).show();
+
+            // Go to Login screen
+            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+
+            // Pass email/phone to prefill login field
+            intent.putExtra("emailOrPhone", email); // or phone
+            startActivity(intent);
+
+            finish(); // close SignUpActivity
         });
     }
 
