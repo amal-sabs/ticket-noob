@@ -75,6 +75,7 @@ public class EventListActivity extends AppCompatActivity {
         super.onResume();
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.getMenu().findItem(R.id.nav_events).setChecked(true);
+        applyFilters();
     }
 
     @SuppressLint("StringFormatInvalid")

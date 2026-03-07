@@ -61,6 +61,14 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEvent(eventId);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (currentEvent != null) {
+            loadEvent(currentEvent.getId());
+        }
+    }
+
     private void loadEvent(String eventId) {
         eventService.getEventById(eventId, result -> {
             if (result == null || !result.success || result.data == null) {

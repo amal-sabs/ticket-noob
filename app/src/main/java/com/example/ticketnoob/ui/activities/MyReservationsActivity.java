@@ -64,6 +64,7 @@ public class MyReservationsActivity extends AppCompatActivity {
         super.onResume();
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.getMenu().findItem(R.id.nav_reservations).setChecked(true);
+        loadTickets();
     }
 
     private void loadTickets() {
@@ -78,7 +79,7 @@ public class MyReservationsActivity extends AppCompatActivity {
             List<Reservation> userReservations = result.data;
             if (userReservations.isEmpty()) {
                 Toast.makeText(this, "No active tickets", Toast.LENGTH_SHORT).show();
-                //ticketAdapter.updateData(new ArrayList<>(), new ArrayList<>());
+                reservationsAdapter.updateData(new ArrayList<>(), new ArrayList<>());
                 return;
             }
 
