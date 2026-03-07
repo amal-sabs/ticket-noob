@@ -125,4 +125,28 @@ public class EventRepository {
                 .addOnFailureListener( e ->
                         callback.onComplete(null, e.getMessage()));
     }
+
+    public void update(Event event, RepositoryCallback<Boolean> callback){
+        if (event == null){
+            callback.onComplete(false, "Event is null");
+            return;
+        }
+
+        if (event.getId() == null || event.getId().isEmpty()){
+            callback.onComplete(false, "Event ID required");
+            return;
+        }
+
+        db.collection("events")
+                .document(event.getId())
+                .set(event)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        callback.onComplete(true, null);
+                    } else{
+                        Exception e = task.getException();
+                        callback.onComplete(false, e != null ? e.getMessage() : "Unknown Firestore error");
+                    }
+                });
+    }
 }
