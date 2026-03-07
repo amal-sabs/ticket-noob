@@ -50,7 +50,7 @@ public class EventListActivity extends AppCompatActivity {
         eventAdapter = new EventAdapter(events, event -> {
             Intent intent = new Intent(EventListActivity.this, EventDetailActivity.class);
             intent.putExtra("eventId", event.getId());
-
+            intent.putExtra("userId", getIntent().getStringExtra("userId"));
             startActivity(intent);
         });
         rvEvents.setAdapter(eventAdapter);
