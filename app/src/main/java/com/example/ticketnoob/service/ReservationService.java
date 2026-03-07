@@ -6,7 +6,6 @@ import com.example.ticketnoob.model.Status;
 import com.example.ticketnoob.repository.EventRepository;
 import com.example.ticketnoob.repository.ReservationRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class ReservationService {
@@ -97,7 +96,7 @@ public class ReservationService {
                             Reservation reservation = new Reservation(
                                     trimmedUserId,
                                     trimmedEventId,
-                                    LocalDateTime.now().toString()
+                                    String.valueOf(System.currentTimeMillis())
                             );
                             reservation.setStatusEnum(Status.ACTIVE);
 
