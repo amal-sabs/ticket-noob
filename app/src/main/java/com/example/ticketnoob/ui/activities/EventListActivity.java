@@ -70,6 +70,13 @@ public class EventListActivity extends AppCompatActivity {
         NavHelper.setup(this, bottomNav, R.id.nav_events, userId);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.getMenu().findItem(R.id.nav_events).setChecked(true);
+    }
+
     @SuppressLint("StringFormatInvalid")
     private void applyFilters() {
         eventService.filterEvents(selectedDate, selectedLocation, selectedCategory, true, result -> {

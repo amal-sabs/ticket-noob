@@ -59,6 +59,13 @@ public class MyReservationsActivity extends AppCompatActivity {
         NavHelper.setup(this, bottomNav, R.id.nav_reservations, currentUserId);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.getMenu().findItem(R.id.nav_reservations).setChecked(true);
+    }
+
     private void loadTickets() {
         reservationService.getActiveReservationsForUser(currentUserId, result -> {
             if (result == null || !result.success || result.data == null) {

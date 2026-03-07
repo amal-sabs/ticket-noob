@@ -11,7 +11,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class NavHelper {
 
     public static void setup(Activity activity, BottomNavigationView bottomNav, int currentItemId, String userId) {
-        bottomNav.setSelectedItemId(currentItemId);
+        bottomNav.getMenu().findItem(currentItemId).setChecked(true);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == currentItemId) return false;
