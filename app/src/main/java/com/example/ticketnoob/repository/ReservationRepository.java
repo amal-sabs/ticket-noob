@@ -172,4 +172,31 @@ public class ReservationRepository {
                 .addOnFailureListener(e ->
                         callback.onComplete(null, e.getMessage()));
     }
+
+    public void findActiveByEventId(String eventId, RepositoryCallback<List<Reservation>> callback){
+        if (eventId == null || eventId.isEmpty()){
+            callback.onComplete(null, "Event ID required");
+            return;
+        }
+
+        db.collection("reservations")
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "ACTIVE")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<Reservation> reservations = new ArrayList<>();
+
+                    snapshot.getDocuments().forEach(doc -> {
+                        Reservation reservation = doc.toObject(Reservation.class);
+                        if (reservation != null){
+                            reservation.setId(doc.getId());
+                            reservations.add(reservation);
+                        }
+                    });
+
+                    callback.onComplete(reservations, null);
+                })
+                .addOnFailureListener(e ->
+                        callback.onComplete(null, e.getMessage()));
+    }
 }
