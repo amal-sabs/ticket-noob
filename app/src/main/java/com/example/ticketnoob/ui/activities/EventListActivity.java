@@ -19,6 +19,8 @@ import com.example.ticketnoob.model.Event;
 import com.example.ticketnoob.repository.EventRepository;
 import com.example.ticketnoob.service.EventService;
 import com.example.ticketnoob.ui.adapters.EventAdapter;
+import com.example.ticketnoob.util.NavHelper;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +46,15 @@ public class EventListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_list);
 
+        String userId = getIntent().getStringExtra("userId");
+
         rvEvents = findViewById(R.id.rvEvents);
         rvEvents.setLayoutManager(new LinearLayoutManager(this));
 
         eventAdapter = new EventAdapter(events, event -> {
             Intent intent = new Intent(EventListActivity.this, EventDetailActivity.class);
             intent.putExtra("eventId", event.getId());
-
+            intent.putExtra("userId", getIntent().getStringExtra("userId"));
             startActivity(intent);
         });
         rvEvents.setAdapter(eventAdapter);
@@ -60,6 +64,17 @@ public class EventListActivity extends AppCompatActivity {
         eventService = new EventService(new EventRepository());
 
 //        new EventRepository().seedSampleEvents(); // only keep temporarily
+        applyFilters();
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        NavHelper.setup(this, bottomNav, R.id.nav_events, userId);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.getMenu().findItem(R.id.nav_events).setChecked(true);
         applyFilters();
     }
 
