@@ -65,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
             if(user != null){
                 intent.putExtra("userName", user.getName());
                 intent.putExtra("userId", user.getId());
+                intent.putExtra("userRole", user.getRole());
             }
 
             startActivity(intent);

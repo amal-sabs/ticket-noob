@@ -3,6 +3,7 @@ package com.example.ticketnoob.ui.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,12 +21,24 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         void onEventClick(Event event);
     }
 
+    public interface OnEditClickListener {
+        void onEditClick(Event event);
+    }
+
     private List<Event> events;
     private final OnEventClickListener listener;
+    private OnEditClickListener editListener;
+    private boolean isAdmin = false;
 
     public EventAdapter(List<Event> events, OnEventClickListener listener) {
         this.events = events;
         this.listener = listener;
+    }
+
+    public void setAdminMode(boolean isAdmin, OnEditClickListener editListener) {
+        this.isAdmin = isAdmin;
+        this.editListener = editListener;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -40,7 +53,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
 
-        // Bind (these methods MUST exist on your model Event, otherwise fix Event model)
         holder.tvTitle.setText(event.getTitle());
         holder.tvDate.setText(event.getDate());
         holder.tvLocation.setText(event.getLocation());
@@ -51,6 +63,16 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onEventClick(event);
         });
+
+        // Show/hide edit button based on admin status
+        if (isAdmin && holder.btnEdit != null) {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnEdit.setOnClickListener(v -> {
+                if (editListener != null) editListener.onEditClick(event);
+            });
+        } else if (holder.btnEdit != null) {
+            holder.btnEdit.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -65,6 +87,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvDate, tvLocation, tvCategory, tvPrice, tvSeats;
+        Button btnEdit;
 
         EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +97,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
             tvCategory = itemView.findViewById(R.id.tvEventCategory);
             tvPrice = itemView.findViewById(R.id.tvEventPrice);
             tvSeats = itemView.findViewById(R.id.tvEventSeats);
+            btnEdit = itemView.findViewById(R.id.btnEditEvent);
         }
     }
 }
