@@ -24,14 +24,16 @@ public class EventRepository {
         addEvent("Food Festival", "2026-03-20 12:00", "Downtown", "Festival", 12.50, 300, Status.ACTIVE.name());
     }
 
-    private void addEvent(String title, String date, String location, String category, double price, int availableSeats, String status) {
+    private void addEvent(String title, String date, String location, String category, double price, int capacity, String status) {
         Map<String, Object> data = new HashMap<>();
         data.put("title", title);
+        data.put("description", title);
         data.put("date", date);
         data.put("location", location);
         data.put("category", category);
         data.put("price", price);
-        data.put("availableSeats", availableSeats);
+        data.put("availableSeats", capacity);
+        data.put("capacity", capacity);
         data.put("status", status);
 
         // Auto-ID document

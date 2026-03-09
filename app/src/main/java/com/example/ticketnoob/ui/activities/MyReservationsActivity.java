@@ -13,7 +13,11 @@ import com.example.ticketnoob.model.Event;
 import com.example.ticketnoob.model.Reservation;
 import com.example.ticketnoob.repository.EventRepository;
 import com.example.ticketnoob.repository.ReservationRepository;
+import com.example.ticketnoob.repository.UserRepository;
 import com.example.ticketnoob.service.EventService;
+import com.example.ticketnoob.service.FirebaseEmailSender;
+import com.example.ticketnoob.service.FirebaseSmsSender;
+import com.example.ticketnoob.service.NotificationService;
 import com.example.ticketnoob.service.ReservationService;
 import com.example.ticketnoob.util.NavHelper;
 import com.example.ticketnoob.util.ReservationsAdapter;
@@ -21,6 +25,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MyReservationsActivity extends AppCompatActivity {
 
@@ -31,6 +36,12 @@ public class MyReservationsActivity extends AppCompatActivity {
     private ReservationService reservationService;
     private EventService eventService;
     private String currentUserId;
+
+    private NotificationService notificationService = new NotificationService(
+            new UserRepository(),
+            new FirebaseEmailSender(),
+            new FirebaseSmsSender()
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,8 +138,21 @@ public class MyReservationsActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                             return;
                         }
+
                         Toast.makeText(this, "Reservation cancelled", Toast.LENGTH_SHORT).show();
                         loadTickets();
+
+                        eventService.getEventById(reservation.getEventId(), getEventResult -> {
+                            if (getEventResult == null || !getEventResult.success || getEventResult.data == null) {
+                                return;
+                            }
+
+                            notificationService.notifyBookingCancelled(currentUserId, getEventResult.data, notifResult -> {
+                                if (notifResult != null && notifResult.success) {
+                                    Toast.makeText(this, "Cancellation notification sent!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        });
                     });
                 })
                 .show();

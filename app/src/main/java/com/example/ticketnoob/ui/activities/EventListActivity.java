@@ -2,6 +2,7 @@ package com.example.ticketnoob.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.Toast;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -17,7 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ticketnoob.R;
 import com.example.ticketnoob.model.Event;
 import com.example.ticketnoob.repository.EventRepository;
+import com.example.ticketnoob.repository.UserRepository;
 import com.example.ticketnoob.service.EventService;
+import com.example.ticketnoob.service.FirebaseEmailSender;
+import com.example.ticketnoob.service.FirebaseSmsSender;
+import com.example.ticketnoob.service.NotificationService;
 import com.example.ticketnoob.ui.adapters.EventAdapter;
 import com.example.ticketnoob.util.NavHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -55,15 +60,44 @@ public class EventListActivity extends AppCompatActivity {
             Intent intent = new Intent(EventListActivity.this, EventDetailActivity.class);
             intent.putExtra("eventId", event.getId());
             intent.putExtra("userId", getIntent().getStringExtra("userId"));
+            intent.putExtra("userRole", getIntent().getStringExtra("userRole"));
             startActivity(intent);
         });
         rvEvents.setAdapter(eventAdapter);
         findViewById(R.id.btnFilter).setOnClickListener(v -> showFilterDialog());
         setupSearch();
 
+        String userRole = getIntent().getStringExtra("userRole");
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole);
+
+        Button btnAddEvent = findViewById(R.id.btnAddEvent);
+
+        if (isAdmin) {
+            eventAdapter.setAdminMode(true, event -> {
+                Intent editIntent = new Intent(EventListActivity.this, EditEventActivity.class);
+                editIntent.putExtra("eventId", event.getId());
+                editIntent.putExtra("eventTitle", event.getTitle());
+                editIntent.putExtra("eventDescription", event.getDescription());
+                editIntent.putExtra("eventDate", event.getDate());
+                editIntent.putExtra("eventLocation", event.getLocation());
+                editIntent.putExtra("eventCategory", event.getCategory());
+                editIntent.putExtra("eventCapacity", event.getCapacity());
+                editIntent.putExtra("eventPrice", event.getPrice());
+                editIntent.putExtra("userId", userId);
+                startActivity(editIntent);
+            });
+
+            btnAddEvent.setVisibility(View.VISIBLE);
+            btnAddEvent.setOnClickListener(v -> {
+                Intent addIntent = new Intent(EventListActivity.this, AddEventActivity.class);
+                addIntent.putExtra("userId", userId);
+                startActivity(addIntent);
+            });
+        }
+
         eventService = new EventService(new EventRepository());
 
-//        new EventRepository().seedSampleEvents(); // only keep temporarily
+        //new EventRepository().seedSampleEvents(); // only keep temporarily
         applyFilters();
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);

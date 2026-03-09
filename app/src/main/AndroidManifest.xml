@@ -28,6 +28,8 @@
         <activity android:name=".ui.activities.EventListActivity"/>
         <activity android:name=".ui.activities.EventDetailActivity" />
         <activity android:name=".ui.activities.MyReservationsActivity" />
+        <activity android:name=".ui.activities.EditEventActivity" />
+        <activity android:name=".ui.activities.AddEventActivity" />
     </application>
 
 </manifest>

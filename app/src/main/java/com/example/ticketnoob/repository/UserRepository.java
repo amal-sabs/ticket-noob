@@ -188,4 +188,29 @@ public class UserRepository {
                 .addOnSuccessListener(unused -> callback.onComplete(true, null))
                 .addOnFailureListener(e -> callback.onComplete(false, e.getMessage()));
     }
+
+    public void findById(String userId, RepositoryCallback<User> callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onComplete(null, "User ID required");
+            return;
+        }
+
+        database.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (!snapshot.exists()) {
+                        callback.onComplete(null, "User not found");
+                        return;
+                    }
+
+                    User user = snapshot.toObject(User.class);
+                    if (user != null) {
+                        user.setId(snapshot.getId());
+                    }
+                    callback.onComplete(user, null);
+                })
+                .addOnFailureListener(e ->
+                        callback.onComplete(null, e.getMessage()));
+    }
 }
