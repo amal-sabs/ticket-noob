@@ -10,6 +10,7 @@ import com.example.ticketnoob.repository.UserRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,7 +27,8 @@ public class RegistrationFlowFunctionalTest {
         LoginService loginService = new LoginService(userRepository);
 
         // test data
-        String email = "functionalTest@example.com";
+        String unique = UUID.randomUUID().toString().substring(0, 8);
+        String email = "functionalTest" + unique + "@example.com";
         String password = "TestPass123";
 
         // REGISTER
