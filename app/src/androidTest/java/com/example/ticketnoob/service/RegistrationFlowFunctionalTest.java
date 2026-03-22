@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(AndroidJUnit4.class)
 public class RegistrationFlowFunctionalTest {
 
-    private static final long TIMEOUT_SECONDS = 20L;
+    private static final long TIMEOUT_SECONDS = 5L;
 
     @Test
     public void register_then_login_success() throws InterruptedException {
