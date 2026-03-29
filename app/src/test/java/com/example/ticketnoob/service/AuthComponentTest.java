@@ -98,6 +98,132 @@ public class AuthComponentTest {
     }
 
     @Test
+    public void testRegister_PhoneSuccessFlow() {
+        String name = "Phone User";
+        String phone = "1234567890";
+        String password = "password123";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<Boolean> repoCallback = invocation.getArgument(1);
+            repoCallback.onComplete(true, null);
+            return null;
+        }).when(mockRepo).save(any(User.class), any());
+
+        registrationService.register(name, "", phone, password, registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertTrue(result.success);
+        assertNotNull(result.data);
+
+        User registeredUser = result.data;
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> loginCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> loginCaptor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<User> repoCallback = invocation.getArgument(2);
+            repoCallback.onComplete(registeredUser, null);
+            return null;
+        }).when(mockRepo).authenticate(eq(phone), eq(password), any());
+
+        loginService.login(phone, password, loginCallback);
+
+        verify(mockRepo).authenticate(eq(phone), eq(password), any());
+
+        verify(loginCallback).onComplete(loginCaptor.capture());
+        assertTrue(loginCaptor.getValue().success);
+        assertEquals(phone, loginCaptor.getValue().data.getPhone());
+    }
+
+    @Test
+    public void testRegister_InvalidEmailFailure() {
+        String invalidEmail = "not-an-email";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        registrationService.register("User", invalidEmail, "", "pass123", registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("Invalid email format", result.message);
+
+        verify(mockRepo, never()).save(any(), any());
+    }
+
+    @Test
+    public void testRegister_InvalidPhoneFailure() {
+        String invalidPhone = "123-abc";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        registrationService.register("User", "", invalidPhone, "pass123", registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("Invalid phone format", result.message);
+
+        verify(mockRepo, never()).save(any(), any());
+    }
+
+    @Test
+    public void testRegister_NoContactMethodFailure() {
+        String name = "No Contact User";
+        String email = "";
+        String phone = "";
+        String password = "password123";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        registrationService.register(name, email, phone, password, registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("Provide email OR phone", result.message);
+
+        verify(mockRepo, never()).save(any(), any());
+    }
+
+    @Test
+    public void testRegister_NoPasswordFailure() {
+        String name = "No Password User";
+        String email = "valid@example.com";
+        String phone = "";
+        String password = "";
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        registrationService.register(name, email, phone, password, registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("Password required", result.message);
+
+        verify(mockRepo, never()).save(any(), any());
+    }
+
+    @Test
     public void testLogin_MultipleAttempts_RepoCalledEachTime() {
 
         String email = "test@example.com";
@@ -162,4 +288,28 @@ public class AuthComponentTest {
         verify(mockRepo, times(1)).authenticate(eq(email), eq(password2), any());
         verify(mockRepo, times(2)).authenticate(anyString(), anyString(), any());
     }
+
+    @Test
+    public void testRegister_DuplicateUserFailure() {
+        String email = "existing@example.com";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<Boolean> repoCallback = invocation.getArgument(1);
+            repoCallback.onComplete(false, "User already exists");
+            return null;
+        }).when(mockRepo).save(any(User.class), any());
+
+        registrationService.register("New User", email, "", "password123", registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("User already exists", result.message);
+    }
+
 }
