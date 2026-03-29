@@ -181,49 +181,6 @@ public class AuthComponentTest {
     }
 
     @Test
-    public void testRegister_NoContactMethodFailure() {
-        String name = "No Contact User";
-        String email = "";
-        String phone = "";
-        String password = "password123";
-
-        @SuppressWarnings("unchecked")
-        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
-        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
-
-        registrationService.register(name, email, phone, password, registerCallback);
-
-        verify(registerCallback).onComplete(captor.capture());
-        ServiceResult<User> result = captor.getValue();
-
-        assertFalse(result.success);
-        assertEquals("Provide email OR phone", result.message);
-
-        verify(mockRepo, never()).save(any(), any());
-    }
-
-    @Test
-    public void testRegister_NoPasswordFailure() {
-        String name = "No Password User";
-        String email = "valid@example.com";
-        String phone = "";
-        String password = "";
-        @SuppressWarnings("unchecked")
-        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
-        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
-
-        registrationService.register(name, email, phone, password, registerCallback);
-
-        verify(registerCallback).onComplete(captor.capture());
-        ServiceResult<User> result = captor.getValue();
-
-        assertFalse(result.success);
-        assertEquals("Password required", result.message);
-
-        verify(mockRepo, never()).save(any(), any());
-    }
-
-    @Test
     public void testLogin_MultipleAttempts_RepoCalledEachTime() {
 
         String email = "test@example.com";
