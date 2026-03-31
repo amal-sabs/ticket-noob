@@ -5,6 +5,7 @@ import com.example.ticketnoob.repository.RepositoryCallback;
 import com.example.ticketnoob.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,7 +35,6 @@ public class AuthComponentTest {
         String name = "Integration User";
         String email = "integration@example.com";
         String password = "password123";
-
         @SuppressWarnings("unchecked")
         ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
 
@@ -98,13 +98,96 @@ public class AuthComponentTest {
     }
 
     @Test
+    public void testRegister_PhoneSuccessFlow() {
+        String name = "Phone User";
+        String phone = "1234567890";
+        String password = "password123";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<Boolean> repoCallback = invocation.getArgument(1);
+            repoCallback.onComplete(true, null);
+            return null;
+        }).when(mockRepo).save(any(User.class), any());
+
+        registrationService.register(name, "", phone, password, registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertTrue(result.success);
+        assertNotNull(result.data);
+
+        User registeredUser = result.data;
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> loginCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> loginCaptor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<User> repoCallback = invocation.getArgument(2);
+            repoCallback.onComplete(registeredUser, null);
+            return null;
+        }).when(mockRepo).authenticate(eq(phone), eq(password), any());
+
+        loginService.login(phone, password, loginCallback);
+
+        verify(mockRepo).authenticate(eq(phone), eq(password), any());
+
+        verify(loginCallback).onComplete(loginCaptor.capture());
+        assertTrue(loginCaptor.getValue().success);
+        assertEquals(phone, loginCaptor.getValue().data.getPhone());
+    }
+
+    @Test
+    public void testRegister_InvalidEmailFailure() {
+        String invalidEmail = "not-an-email";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        registrationService.register("User", invalidEmail, "", "pass123", registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("Invalid email format", result.message);
+
+        verify(mockRepo, never()).save(any(), any());
+    }
+
+    @Test
+    public void testRegister_InvalidPhoneFailure() {
+        String invalidPhone = "123-abc";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        registrationService.register("User", "", invalidPhone, "pass123", registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("Invalid phone format", result.message);
+
+        verify(mockRepo, never()).save(any(), any());
+    }
+
+    @Test
     public void testLogin_MultipleAttempts_RepoCalledEachTime() {
 
         String email = "test@example.com";
         String password1 = "wrongpassword";
         String password2 = "correctpassword";
-
-        User mockUser = new User("1", "Test User", email, null, password2, "CUSTOMER");
+        String hash1 = BCrypt.hashpw(password2, BCrypt.gensalt());
+        User mockUser = new User("1", "Test User", email, null, hash1, "CUSTOMER");
 
         // Mock authenticate
 
@@ -114,14 +197,11 @@ public class AuthComponentTest {
             String passedPassword = invocation.getArgument(1);
             RepositoryCallback<User> repoCallback = invocation.getArgument(2);
 
-            if (passedPassword.equals(password1)) {
-                // Simulate failed login
-                repoCallback.onComplete(null, "Invalid credentials");
-            } else if (passedPassword.equals(password2)) {
-                // Simulate successful login
+            if (BCrypt.checkpw(passedPassword, hash1)) {
                 repoCallback.onComplete(mockUser, null);
+            } else {
+                repoCallback.onComplete(null, "Invalid credentials");
             }
-
             return null;
         }).when(mockRepo).authenticate(anyString(), anyString(), any());
 
@@ -162,4 +242,62 @@ public class AuthComponentTest {
         verify(mockRepo, times(1)).authenticate(eq(email), eq(password2), any());
         verify(mockRepo, times(2)).authenticate(anyString(), anyString(), any());
     }
+
+    @Test
+    public void testRegister_DuplicateUserFailure() {
+        String email = "existing@example.com";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<User>> captor = ArgumentCaptor.forClass((Class) ServiceResult.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<Boolean> repoCallback = invocation.getArgument(1);
+            repoCallback.onComplete(false, "User already exists");
+            return null;
+        }).when(mockRepo).save(any(User.class), any());
+
+        registrationService.register("New User", email, "", "password123", registerCallback);
+
+        verify(registerCallback).onComplete(captor.capture());
+        ServiceResult<User> result = captor.getValue();
+
+        assertFalse(result.success);
+        assertEquals("User already exists", result.message);
+    }
+
+    @Test
+    public void testRegister_PasswordIsHashedBeforeSaving() {
+        String plainPassword = "securePassword123";
+        String name = "Security User";
+        String email = "security@example.com";
+
+        @SuppressWarnings("unchecked")
+        ServiceCallback<User> registerCallback = mock(ServiceCallback.class);
+
+        doAnswer(invocation -> {
+            RepositoryCallback<Boolean> repoCallback = invocation.getArgument(1);
+            repoCallback.onComplete(true, null);
+            return null;
+        }).when(mockRepo).save(any(User.class), any());
+
+        registrationService.register(name, email, "", plainPassword, registerCallback);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(mockRepo).save(userCaptor.capture(), any());
+
+        User capturedUser = userCaptor.getValue();
+        String storedPassword = capturedUser.getPassword();
+
+        // Verification A: Ensure the stored password is NOT the plain text
+        assertNotEquals("Password should not be stored in plain text!",
+                plainPassword, storedPassword);
+
+        // Verification B: Ensure it follows the BCrypt format
+        assertTrue(storedPassword.startsWith("$2"));
+
+        // Verification C: Use BCrypt to verify the plain text matches the captured hash
+        assertTrue(BCrypt.checkpw(plainPassword, storedPassword));
+    }
+
 }

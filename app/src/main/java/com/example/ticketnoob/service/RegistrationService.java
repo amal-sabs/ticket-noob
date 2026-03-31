@@ -4,6 +4,8 @@ package com.example.ticketnoob.service;
 import com.example.ticketnoob.model.User;
 import com.example.ticketnoob.repository.UserRepository;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -56,8 +58,9 @@ public class RegistrationService {
             callback.onComplete(ServiceResult.error("Password required", "password"));
             return;
         }
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        User user = new User(name, email, phone, password, "CUSTOMER"); // Hard code customer for now
+        User user = new User(name, email, phone, hashedPassword, "CUSTOMER"); // Hard code customer for now
 
         userRepository.save(user, (success, error) -> {
             if (success == null || !success) {

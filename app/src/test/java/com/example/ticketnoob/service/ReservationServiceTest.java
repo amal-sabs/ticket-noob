@@ -314,9 +314,83 @@ class ReservationServiceTest {
         verify(mockReservationRepo, never()).save(any(Reservation.class), any());
     }
 
+    @Test
+    void createReservation_checkExistingFails_returnsError() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Reservation> callback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<Reservation>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+
+        doAnswer(invocation -> {
+            ((RepositoryCallback<Event>) invocation.getArgument(1)).onComplete(activeEventWithSeats, null);
+            return null;
+        }).when(mockEventRepo).findById(eq("e1"), any());
+
+        doAnswer(invocation -> {
+            ((RepositoryCallback<List<Reservation>>) invocation.getArgument(2)).onComplete(null, "Database timeout");
+            return null;
+        }).when(mockReservationRepo).findActiveByUserIdAndEventId(eq("u1"), eq("e1"), any());
+
+        reservationService.createReservation("u1", "e1", callback);
+
+        verify(callback).onComplete(captor.capture());
+        assertFalse(captor.getValue().success);
+        assertEquals("Database timeout", captor.getValue().message);
+    }
+
     // =========================================================================
     // cancelReservation
     // =========================================================================
+
+    @Test
+    void cancelReservation_eventNotFound_returnsError() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Reservation> callback = mock(ServiceCallback.class);
+
+        doAnswer(invocation -> {
+            ((RepositoryCallback<Reservation>) invocation.getArgument(1)).onComplete(activeReservation, null);
+            return null;
+        }).when(mockReservationRepo).findById(anyString(), any());
+
+        // Simulate event disappearing from DB
+        doAnswer(invocation -> {
+            ((RepositoryCallback<Event>) invocation.getArgument(1)).onComplete(null, "Event missing");
+            return null;
+        }).when(mockEventRepo).findById(anyString(), any());
+
+        reservationService.cancelReservation("r1", callback);
+
+        ArgumentCaptor<ServiceResult<Reservation>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+        verify(callback).onComplete(captor.capture());
+        assertEquals("Event missing", captor.getValue().message);
+    }
+
+    @Test
+    void cancelReservation_eventAlreadyCancelled_successWithoutRestoringSeat() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Reservation> callback = mock(ServiceCallback.class);
+
+        doAnswer(invocation -> {
+            ((RepositoryCallback<Reservation>) invocation.getArgument(1)).onComplete(activeReservation, null);
+            return null;
+        }).when(mockReservationRepo).findById(anyString(), any());
+
+        doAnswer(invocation -> {
+            ((RepositoryCallback<Event>) invocation.getArgument(1)).onComplete(cancelledEvent, null);
+            return null;
+        }).when(mockEventRepo).findById(anyString(), any());
+
+        // Mock reservation update success
+        doAnswer(invocation -> {
+            ((RepositoryCallback<Boolean>) invocation.getArgument(1)).onComplete(true, null);
+            return null;
+        }).when(mockReservationRepo).update(any(), any());
+
+        reservationService.cancelReservation("r1", callback);
+
+        verify(callback).onComplete(any());
+        // Verify event update was NEVER called because event was already cancelled
+        verify(mockEventRepo, never()).update(any(), any());
+    }
 
     @Test
     void cancelReservation_success_restoresSeat() {
@@ -459,5 +533,23 @@ class ReservationServiceTest {
         assertFalse(result.success);
         assertEquals("User ID required", result.message);
         assertEquals("userId", result.field);
+    }
+
+    @Test
+    void getActiveReservations_repoError_returnsError() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<List<Reservation>> callback = mock(ServiceCallback.class);
+
+        doAnswer(invocation -> {
+            ((RepositoryCallback<List<Reservation>>) invocation.getArgument(1)).onComplete(null, "Network Error");
+            return null;
+        }).when(mockReservationRepo).findActiveByUserId(anyString(), any());
+
+        reservationService.getActiveReservationsForUser("u1", callback);
+
+        ArgumentCaptor<ServiceResult<List<Reservation>>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+        verify(callback).onComplete(captor.capture());
+        assertFalse(captor.getValue().success);
+        assertEquals("Network Error", captor.getValue().message);
     }
 }

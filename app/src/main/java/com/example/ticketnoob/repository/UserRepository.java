@@ -5,6 +5,8 @@ import com.google.firebase.firestore.Filter;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -143,12 +145,12 @@ public class UserRepository {
                         return;
                     }
 
-                    if (!user.getPassword().equals(password)) {
+                    if (BCrypt.checkpw(password, user.getPassword())) {
+                        callback.onComplete(user, null);
+                    } else {
                         callback.onComplete(null, "Invalid credentials");
-                        return;
                     }
 
-                    callback.onComplete(user, null);
                 })
                 .addOnFailureListener(e ->
                         callback.onComplete(null, e.getMessage()));
