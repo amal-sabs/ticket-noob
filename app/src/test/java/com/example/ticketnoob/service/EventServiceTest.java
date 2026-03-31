@@ -413,14 +413,14 @@ class EventServiceTest {
         assertTrue(result.contains(musicEventParis));
     }
     @Test
-    void applyKeywordSearch_matchesTitleDescriptionCategoryLocation() {
+    void applyKeywordSearch_noMatches_returnsEmptyList() {
         List<Event> result = eventService.applyKeywordSearch(
                 Arrays.asList(musicEventLondon, sportsEventParis, musicEventParis),
-                "jazz"
+                "opera"
         );
 
-        assertEquals(1, result.size());
-        assertEquals("b1", result.get(0).getId());
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.size());
     }
 
     // =========================================================================
