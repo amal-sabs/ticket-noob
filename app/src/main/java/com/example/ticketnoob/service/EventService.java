@@ -125,4 +125,31 @@ public class EventService {
     private static String safeTrim(String s){
         return s == null ? "" : s.trim();
     }
+
+    public List<Event> applyKeywordSearch(List<Event> events, String keyword) {
+        List<Event> result = new ArrayList<>();
+        if (events == null) return result;
+
+        String key = safeTrim(keyword).toLowerCase();
+
+        if (key.isEmpty()) {
+            return new ArrayList<>(events);
+        }
+
+        for (Event event : events) {
+            String title = event.getTitle();
+            String description = event.getDescription();
+            String category = event.getCategory();
+            String location = event.getLocation();
+
+            if ((title != null && title.toLowerCase().contains(key)) ||
+                    (description != null && description.toLowerCase().contains(key)) ||
+                    (category != null && category.toLowerCase().contains(key)) ||
+                    (location != null && location.toLowerCase().contains(key))) {
+                result.add(event);
+            }
+        }
+
+        return result;
+    }
 }

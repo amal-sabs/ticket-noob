@@ -369,6 +369,59 @@ class EventServiceTest {
         assertTrue(result.success);
         assertTrue(result.data.isEmpty());
     }
+    // =========================================================================
+    // applyKeywordSearch
+    // =========================================================================
+    @Test
+    void applyKeywordSearch_matchesTitle() {
+        List<Event> events = Arrays.asList(musicEventLondon, sportsEventParis);
+
+        List<Event> result = eventService.applyKeywordSearch(events, "jazz");
+
+        assertEquals(1, result.size());
+        assertEquals("b1", result.get(0).getId());
+    }
+
+    @Test
+    void applyKeywordSearch_matchesLocation() {
+        List<Event> events = Arrays.asList(musicEventLondon, sportsEventParis);
+
+        List<Event> result = eventService.applyKeywordSearch(events, "paris");
+
+        assertEquals(1, result.size());
+        assertEquals("b2", result.get(0).getId());
+    }
+    @Test
+    void applyKeywordSearch_matchesDescription() {
+        List<Event> events = Arrays.asList(musicEventLondon, sportsEventParis, musicEventParis);
+
+        List<Event> result = eventService.applyKeywordSearch(events, "desc");
+
+        assertEquals(3, result.size());
+        assertTrue(result.contains(musicEventLondon));
+        assertTrue(result.contains(sportsEventParis));
+        assertTrue(result.contains(musicEventParis));
+    }
+    @Test
+    void applyKeywordSearch_matchesCategory() {
+        List<Event> events = Arrays.asList(musicEventLondon, sportsEventParis, musicEventParis);
+
+        List<Event> result = eventService.applyKeywordSearch(events, "music");
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(musicEventLondon));
+        assertTrue(result.contains(musicEventParis));
+    }
+    @Test
+    void applyKeywordSearch_matchesTitleDescriptionCategoryLocation() {
+        List<Event> result = eventService.applyKeywordSearch(
+                Arrays.asList(musicEventLondon, sportsEventParis, musicEventParis),
+                "jazz"
+        );
+
+        assertEquals(1, result.size());
+        assertEquals("b1", result.get(0).getId());
+    }
 
     // =========================================================================
     // Direct unit tests on in-memory helpers (no mock needed)
