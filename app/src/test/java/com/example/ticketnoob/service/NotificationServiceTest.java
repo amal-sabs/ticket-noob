@@ -59,7 +59,12 @@ class NotificationServiceTest {
 
         notificationService.notifyBookingConfirmed("u1", sampleEvent, callback);
 
-        verify(mockEmailSender).send(eq("alice@test.com"), eq("Booking Confirmed"), contains("Jazz Night"), any());
+        verify(mockEmailSender).send(
+                eq("alice@test.com"),
+                eq("Booking Confirmed"),
+                eq("Your reservation for \"Jazz Night\" on 2026-07-01 is confirmed."),
+                any()
+        );
         verify(callback).onComplete(captor.capture());
         assertTrue(captor.getValue().success);
     }
@@ -75,7 +80,11 @@ class NotificationServiceTest {
 
         notificationService.notifyBookingConfirmed("u2", sampleEvent, callback);
 
-        verify(mockSmsSender).send(eq("1234567890"), contains("Jazz Night"), any());
+        verify(mockSmsSender).send(
+                eq("1234567890"),
+                eq("Your reservation for \"Jazz Night\" on 2026-07-01 is confirmed."),
+                any()
+        );
         verifyNoInteractions(mockEmailSender);
         verify(callback).onComplete(captor.capture());
         assertTrue(captor.getValue().success);
@@ -97,6 +106,22 @@ class NotificationServiceTest {
         verify(mockSmsSender).send(eq("9876543210"), contains("Jazz Night"), any());
         verify(callback).onComplete(captor.capture());
         assertTrue(captor.getValue().success);
+    }
+
+    @Test
+    void notifyBookingConfirmed_smsFails_returnsError() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Boolean> callback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<Boolean>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+
+        stubUserLookup("u2", userWithPhone);
+        stubSmsFailure("SMS failed");
+
+        notificationService.notifyBookingConfirmed("u2", sampleEvent, callback);
+
+        verify(callback).onComplete(captor.capture());
+        assertFalse(captor.getValue().success);
+        assertEquals("SMS failed", captor.getValue().message);
     }
 
     @Test
@@ -139,6 +164,18 @@ class NotificationServiceTest {
         assertFalse(captor.getValue().success);
         assertEquals("User not found", captor.getValue().message);
     }
+    @Test
+    void notifyBookingConfirmed_nullUserId_returnsError() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Boolean> callback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<Boolean>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+
+        notificationService.notifyBookingConfirmed(null, sampleEvent, callback);
+
+        verify(callback).onComplete(captor.capture());
+        assertFalse(captor.getValue().success);
+        assertEquals("User ID required", captor.getValue().message);
+    }
 
     @Test
     void notifyBookingConfirmed_noContactInfo_returnsError() {
@@ -172,6 +209,28 @@ class NotificationServiceTest {
     }
 
     @Test
+    void notifyBookingCancelled_fallsBackToSms() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Boolean> callback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<Boolean>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+
+        stubUserLookup("u3", userWithBoth);
+        stubEmailFailure("Email failed");
+        stubSmsSuccess();
+
+        notificationService.notifyBookingCancelled("u3", sampleEvent, callback);
+
+        verify(mockSmsSender).send(
+                eq("9876543210"),
+                eq("Your reservation for \"Jazz Night\" on 2026-07-01 has been cancelled."),
+                any()
+        );
+
+        verify(callback).onComplete(captor.capture());
+        assertTrue(captor.getValue().success);
+    }
+
+    @Test
     void notifyEventCancelled_sendsEmail() {
         @SuppressWarnings("unchecked")
         ServiceCallback<Boolean> callback = mock(ServiceCallback.class);
@@ -183,6 +242,28 @@ class NotificationServiceTest {
         notificationService.notifyEventCancelled("u1", sampleEvent, callback);
 
         verify(mockEmailSender).send(eq("alice@test.com"), eq("Event Cancelled"), contains("automatically cancelled"), any());
+        verify(callback).onComplete(captor.capture());
+        assertTrue(captor.getValue().success);
+    }
+
+    @Test
+    void notifyEventCancelled_fallsBackToSms() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Boolean> callback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<Boolean>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+
+        stubUserLookup("u3", userWithBoth);
+        stubEmailFailure("Email failed");
+        stubSmsSuccess();
+
+        notificationService.notifyEventCancelled("u3", sampleEvent, callback);
+
+        verify(mockSmsSender).send(
+                eq("9876543210"),
+                eq("The event \"Jazz Night\" on 2026-07-01 has been cancelled. Your reservation has been automatically cancelled."),
+                any()
+        );
+
         verify(callback).onComplete(captor.capture());
         assertTrue(captor.getValue().success);
     }
@@ -202,6 +283,22 @@ class NotificationServiceTest {
         verify(callback).onComplete(captor.capture());
         assertFalse(captor.getValue().success);
         assertEquals("SMS failed", captor.getValue().message);
+    }
+
+    @Test
+    void notifyBookingConfirmed_emailFails_noPhone_returnsEmailError() {
+        @SuppressWarnings("unchecked")
+        ServiceCallback<Boolean> callback = mock(ServiceCallback.class);
+        ArgumentCaptor<ServiceResult<Boolean>> captor = ArgumentCaptor.forClass(ServiceResult.class);
+
+        stubUserLookup("u1", userWithEmail); // email only
+        stubEmailFailure("Email failed");
+
+        notificationService.notifyBookingConfirmed("u1", sampleEvent, callback);
+
+        verify(callback).onComplete(captor.capture());
+        assertFalse(captor.getValue().success);
+        assertEquals("Email failed", captor.getValue().message);
     }
 
     // Helpers
