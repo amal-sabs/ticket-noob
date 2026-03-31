@@ -18,18 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ticketnoob.R;
 import com.example.ticketnoob.model.Event;
 import com.example.ticketnoob.repository.EventRepository;
-import com.example.ticketnoob.repository.UserRepository;
 import com.example.ticketnoob.service.EventService;
-import com.example.ticketnoob.service.FirebaseEmailSender;
-import com.example.ticketnoob.service.FirebaseSmsSender;
-import com.example.ticketnoob.service.NotificationService;
 import com.example.ticketnoob.ui.adapters.EventAdapter;
 import com.example.ticketnoob.util.NavHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 
 public class EventListActivity extends AppCompatActivity {
@@ -160,23 +155,10 @@ public class EventListActivity extends AppCompatActivity {
     }
 
     private int applyKeywordFilter() {
-        if (selectedKeyword.isEmpty()) {
-            eventAdapter.updateEvents(new ArrayList<>(serviceFilteredEvents));
-            return serviceFilteredEvents.size();
-        }
+        List<Event> filtered = eventService.applyKeywordSearch(serviceFilteredEvents, selectedKeyword);
+        eventAdapter.updateEvents(filtered);
 
-        List<Event> keywordFiltered = new ArrayList<>();
-        String keywordLower = selectedKeyword.toLowerCase(Locale.US);
-
-        for (Event event : serviceFilteredEvents) {
-            String title = event.getTitle();
-            if (title != null && title.toLowerCase(Locale.US).contains(keywordLower)) {
-                keywordFiltered.add(event);
-            }
-        }
-
-        eventAdapter.updateEvents(keywordFiltered);
-        return keywordFiltered.size();
+        return filtered.size();
     }
 
     private void showFilterDialog() {
