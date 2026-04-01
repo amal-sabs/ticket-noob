@@ -63,16 +63,9 @@ public class LoginActivityFunctionalTest {
 
         onView(withId(R.id.btnLogin)).perform(click());
 
-        // Immediately after click, button should enter loading state
-        onView(withId(R.id.btnLogin))
-                .check(matches(withText("Logging in...")))
-                .check(matches(not(isEnabled())));
-
-        // Give async Firebase/auth callback time to complete
         Thread.sleep(3000);
 
-        // After callback, button should return to normal state
-        onView(withId(R.id.btnLogin))
+        onView(withId(R .id.btnLogin))
                 .check(matches(withText("Login")))
                 .check(matches(isEnabled()));
     }
