@@ -84,5 +84,18 @@ public class SignUpActivityFunctionalTest {
         onView(withId(R.id.etName))
                 .check(matches(hasErrorText("Name required")));
     }
+    @Test
+    public void register_missingPassword_showsPasswordError() {
+        launchActivity();
+
+        onView(withId(R.id.etName)).perform(replaceText("Pamela Daniel"));
+        onView(withId(R.id.etEmail)).perform(replaceText("pamela@test.com"));
+        closeSoftKeyboard();
+
+        onView(withId(R.id.btnRegister)).perform(click());
+
+        onView(withId(R.id.etPassword))
+                .check(matches(hasErrorText("Password required")));
+    }
 
 }
