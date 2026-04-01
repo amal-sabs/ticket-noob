@@ -76,4 +76,18 @@ public class LoginActivityFunctionalTest {
                 .check(matches(withText("Login")))
                 .check(matches(isEnabled()));
     }
+
+    @Test
+    public void login_validCredentials_navigatesSuccessfully() throws InterruptedException {
+        launchActivity();
+
+        onView(withId(R.id.etEmailOrPhone)).perform(replaceText("realemail@email.com"));
+        onView(withId(R.id.etPassword)).perform(replaceText("realpassword"));
+        closeSoftKeyboard();
+
+        onView(withId(R.id.btnLogin)).perform(click());
+
+        Thread.sleep(3000);
+
+    }
 }

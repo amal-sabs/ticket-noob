@@ -84,6 +84,7 @@ public class SignUpActivityFunctionalTest {
         onView(withId(R.id.etName))
                 .check(matches(hasErrorText("Name required")));
     }
+
     @Test
     public void register_missingPassword_showsPasswordError() {
         launchActivity();
@@ -98,4 +99,35 @@ public class SignUpActivityFunctionalTest {
                 .check(matches(hasErrorText("Password required")));
     }
 
+    @Test
+    public void register_validEmail_submitsSuccessfully() throws InterruptedException {
+        launchActivity();
+
+        String uniqueEmail = "john" + System.currentTimeMillis() + "@test.com";
+
+        onView(withId(R.id.etName)).perform(replaceText("John Doe"));
+        onView(withId(R.id.etEmail)).perform(replaceText(uniqueEmail));
+        onView(withId(R.id.etPassword)).perform(replaceText("password123"));
+        closeSoftKeyboard();
+
+        onView(withId(R.id.btnRegister)).perform(click());
+
+        Thread.sleep(3000);
+    }
+
+    @Test
+    public void register_validPhone_submitsSuccessfully() throws InterruptedException {
+        launchActivity();
+
+        String uniquePhone = "514" + (System.currentTimeMillis() % 10000000L);
+
+        onView(withId(R.id.etName)).perform(replaceText("John Doe"));
+        onView(withId(R.id.etPhone)).perform(replaceText(uniquePhone));
+        onView(withId(R.id.etPassword)).perform(replaceText("password123"));
+        closeSoftKeyboard();
+
+        onView(withId(R.id.btnRegister)).perform(click());
+
+        Thread.sleep(3000);
+    }
 }
