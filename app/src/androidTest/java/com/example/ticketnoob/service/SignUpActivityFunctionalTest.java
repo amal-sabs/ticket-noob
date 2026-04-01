@@ -28,7 +28,7 @@ public class SignUpActivityFunctionalTest {
     public void register_missingEmailAndPhone_showsErrorOnBothFields() {
         launchActivity();
 
-        onView(withId(R.id.etName)).perform(replaceText("Pamela Daniel"));
+        onView(withId(R.id.etName)).perform(replaceText("John Doe"));
         onView(withId(R.id.etPassword)).perform(replaceText("password123"));
         closeSoftKeyboard();
 
@@ -45,7 +45,7 @@ public class SignUpActivityFunctionalTest {
     public void register_invalidEmail_showsEmailError() {
         launchActivity();
 
-        onView(withId(R.id.etName)).perform(replaceText("Pamela Daniel"));
+        onView(withId(R.id.etName)).perform(replaceText("John Doe"));
         onView(withId(R.id.etEmail)).perform(replaceText("invalid-email"));
         onView(withId(R.id.etPassword)).perform(replaceText("password123"));
         closeSoftKeyboard();
@@ -60,7 +60,7 @@ public class SignUpActivityFunctionalTest {
     public void register_invalidPhone_showsPhoneError() {
         launchActivity();
 
-        onView(withId(R.id.etName)).perform(replaceText("Pamela Daniel"));
+        onView(withId(R.id.etName)).perform(replaceText("John Doe"));
         onView(withId(R.id.etPhone)).perform(replaceText("123abc"));
         onView(withId(R.id.etPassword)).perform(replaceText("password123"));
         closeSoftKeyboard();
@@ -75,7 +75,7 @@ public class SignUpActivityFunctionalTest {
     public void register_missingName_showsNameError() {
         launchActivity();
 
-        onView(withId(R.id.etEmail)).perform(replaceText("pamela@test.com"));
+        onView(withId(R.id.etEmail)).perform(replaceText("john@test.com"));
         onView(withId(R.id.etPassword)).perform(replaceText("password123"));
         closeSoftKeyboard();
 
@@ -88,8 +88,8 @@ public class SignUpActivityFunctionalTest {
     public void register_missingPassword_showsPasswordError() {
         launchActivity();
 
-        onView(withId(R.id.etName)).perform(replaceText("Pamela Daniel"));
-        onView(withId(R.id.etEmail)).perform(replaceText("pamela@test.com"));
+        onView(withId(R.id.etName)).perform(replaceText("John Doe"));
+        onView(withId(R.id.etEmail)).perform(replaceText("john@test.com"));
         closeSoftKeyboard();
 
         onView(withId(R.id.btnRegister)).perform(click());
