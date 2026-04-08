@@ -38,7 +38,7 @@ jobs:
     - name: Run Android instrumented tests on emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        api-level: 33
+        api-level: 30
         arch: x86_64
         target: google_apis
         disable-animations: true
