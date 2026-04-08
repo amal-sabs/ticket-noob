@@ -40,6 +40,7 @@ jobs:
       with:
         api-level: 30
         arch: x86_64
+        target: google_apis
         script: ./gradlew connectedAndroidTest
 
   dependency-submission:
